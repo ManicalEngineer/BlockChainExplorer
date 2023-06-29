@@ -21,24 +21,26 @@ class Explorer:
 		dict_str = byte_str.decode("UTF-8")
 		return eval(dict_str)
 
+
+	def responseCheck(self, response):
+		if response["message"] == "OK":
+			return response['result']
+		else:
+			raise Exception(response["message"])
+
 	
 	def getABI(self, address: str):
 		"""takes contract address as a string and returns the json of the ABI"""
 		request_url = f"{self.chain}?module=contract&action=getabi&address={address}&apikey={self.api_key}"
 		response = requests.get(request_url)
-		abi = json.loads(self.convResponse(response)['result'])
-		return abi
+		return self.responseCheck(response)
 		
 	
 	def getSource(self, address: str):
 		"""takes contract address as a string and returns the source code"""
 		request_url = f"{self.chain}?module=contract&action=getsourcecode&address={address}&apikey={self.api_key}"
 		response = requests.get(request_url).json()
-		if response['message'] == "OK":
-			return response['result'][0]
-		else:
-			print(response)
-			return None
+		return self.responseCheck(response)[0]
 
 
 	
@@ -50,11 +52,9 @@ class Explorer:
 		if address is not None:
 			request_url += f"&address={address}"
 		request_url += f"&startblock={start_block}&endblock={end_block}&sort=asc&apikey={self.api_key}"
-
 		response = requests.get(request_url)
-		#print(response.content)
 		txs = self.convResponse(response)
-		return txs['result']
+		return self.responseCheck(txs)
 
 	
 	def getTransactionList(self, contract_address: str, address: str, start_block: int = 0, end_block: int = 99999999):
@@ -68,7 +68,7 @@ class Explorer:
 
 		response = requests.get(request_url)
 		txs = self.convResponse(response)
-		return txs['result']
+		return self.responseCheck(txs)
 
 	
 	def getInternalTransactionList(self, contract_address: str, address: str, start_block: int = 0, end_block: int = 99999999):
@@ -82,14 +82,14 @@ class Explorer:
 
 		response = requests.get(request_url)
 		txs = self.convResponse(response)
-		return txs['result']
+		return self.responseCheck(txs)
 
 	
 	def getBlockByTimestamp(self, timestamp: int):
 		"""takes a unix timestamp as an int and turns the block number for that timestamp"""
 		request_url = f"{self.chain}?module=block&action=getblocknobytime&timestamp={timestamp}&closest=before&apikey={self.api_key}"
 		response = requests.get(request_url).json()
-		return int(response['result'])
+		return self.responseCheck(response)
 
 	
 	def getBalance(self, address: str):
@@ -101,11 +101,11 @@ class Explorer:
 					addressStr += ', ' + addy
 				request_url = f"{self.chain}?module=account&action=balancemulti&address={addressStr}&tag=latest&apikey={self.api_key}"
 				response = requests.get(request_url).json()
-				return response['result']
+				return self.responseCheck(response)
 		else:
 			request_url = f"{self.chain}?module=account&action=balance&address={address}&tag=latest&apikey={self.api_key}"
 			response = requests.get(request_url).json()
-			return response['result']
+			return self.responseCheck(response)
 
 		return -1
 
@@ -119,11 +119,11 @@ class Explorer:
 					addressStr += ', ' + addy
 				request_url = f"{self.chain}?module=contract&action=getcontractcreation&address={addressStr}&tag=latest&apikey={self.api_key}"
 				response = requests.get(request_url).json()
-				return response['result']
+				return responseCheck(response)
 		else:
 			request_url = f"{self.chain}?module=contract&action=getcontractcreation&address={address}&tag=latest&apikey={self.api_key}"
 			response = requests.get(request_url).json()
-			return response['result']
+			return self.responseCheck(response)
 
 		return -1		
 
@@ -132,4 +132,9 @@ class Explorer:
 		"""Takes a transaction hash as a string and returns the internal transactions as a list of dicts"""
 		request_url = f'{self.chain}?module=account&action=txlistinternal&txhash={tx}&apikey={self.api_key}'
 		response = requests.get(request_url).json()
-		return response
+		return self.responseCheck(response)
+
+if __name__ == "__main__":
+	xp = Explorer("eth", "9UDJK9QAU3J9N7VSWC41GAD1JZ9UMX3GPA")
+	for i in range(100):
+		print(int(xp.getBalance("0x7B52f833c225133A6C849584325A554588A6B597"))/1e18)
