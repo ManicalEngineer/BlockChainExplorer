@@ -134,7 +134,3 @@ class Explorer:
 		response = requests.get(request_url).json()
 		return self.responseCheck(response)
 
-if __name__ == "__main__":
-	xp = Explorer("eth", "9UDJK9QAU3J9N7VSWC41GAD1JZ9UMX3GPA")
-	for i in range(100):
-		print(int(xp.getBalance("0x7B52f833c225133A6C849584325A554588A6B597"))/1e18)
