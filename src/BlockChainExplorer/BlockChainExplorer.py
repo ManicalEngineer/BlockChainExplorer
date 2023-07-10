@@ -117,11 +117,11 @@ class Explorer:
 				addressStr = address[0]
 				for addy in address:
 					addressStr += ', ' + addy
-				request_url = f"{self.chain}?module=contract&action=getcontractcreation&address={addressStr}&tag=latest&apikey={self.api_key}"
+				request_url = f"{self.chain}?module=contract&action=getcontractcreation&contractaddresses={addressStr}&tag=latest&apikey={self.api_key}"
 				response = requests.get(request_url).json()
 				return responseCheck(response)
 		else:
-			request_url = f"{self.chain}?module=contract&action=getcontractcreation&address={address}&tag=latest&apikey={self.api_key}"
+			request_url = f"{self.chain}?module=contract&action=getcontractcreation&contractaddresses={address}&tag=latest&apikey={self.api_key}"
 			response = requests.get(request_url).json()
 			return self.responseCheck(response)
 
